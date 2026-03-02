@@ -1,0 +1,48 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.suo.user
+*.DotSettings.user
+_ReSharper.Caches/
+
+# Visual Studio
+.vs/
+*.visualstate
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Rider
+.idea/
+
+# Publish
+publish/
+
+# Windows shortcut
+*.lnk
+
+# OS
+.DS_Store
+Thumbs.db

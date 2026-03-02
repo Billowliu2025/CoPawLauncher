@@ -1,0 +1,87 @@
+<Window x:Class="CoPawLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Title="CoPaw Launcher" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 标题栏 -->
+        <Border Grid.Row="0" Background="#2D2D30" Padding="15,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0"
+                           Text="CoPaw 快捷启动器" 
+                           FontSize="18" 
+                           FontWeight="Bold" 
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+                
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Margin="10,0,0,0">
+                    
+                    <!-- 刷新按钮 -->
+                    <Button Content="刷新" 
+                            Click="RefreshButton_Click"
+                            Padding="15,8"
+                            Margin="0,0,10,0"
+                            Background="#007ACC"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            ToolTip="刷新页面 (F5)"/>
+                    
+                    <!-- 退出按钮 -->
+                    <Button Content="退出" 
+                            Click="ExitButton_Click"
+                            Padding="15,8"
+                            Background="#E81123"
+                            Foreground="White"
+                            BorderThickness="0"
+                            Cursor="Hand"
+                            FontWeight="Bold"
+                            ToolTip="退出程序并停止 CoPaw 服务"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- WebView2 浏览器 -->
+        <wv2:WebView2 Grid.Row="1" 
+                      Name="webView"
+                      Margin="0"
+                      Source="http://127.0.0.1:8088/chat"/>
+
+        <!-- 状态栏 -->
+        <Border Grid.Row="2" Background="#007ACC" Padding="10,5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBlock Grid.Column="0" 
+                           Text="状态：" 
+                           Foreground="White"
+                           Margin="0,0,5,0"/>
+                
+                <TextBlock Grid.Column="1" 
+                           Name="statusText"
+                           Text="正在加载 CoPaw..." 
+                           Foreground="White"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
