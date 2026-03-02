@@ -1,7 +1,6 @@
-using System.Configuration;
-using System.Data;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Media;
 
 namespace CoPawLauncher;
 
@@ -17,8 +16,35 @@ public partial class App : Application
     {
         base.OnStartup(e);
         
+        // 初始化设置数据库并加载已保存的主题
+        SettingsStore.Initialize();
+        LoadSavedTheme();
+        
         // 在后台启动 copaw 进程
         StartCopawBackground();
+    }
+
+    /// <summary>
+    /// 从 SQLite 加载上次保存的主题设置
+    /// </summary>
+    private static void LoadSavedTheme()
+    {
+        try
+        {
+            var isDark = SettingsStore.GetBool(SettingsStore.KeyIsDarkTheme, defaultValue: false);
+            if (isDark)
+                ThemeManager.SetDarkTheme(save: false);
+            else
+                ThemeManager.SetLightTheme(save: false);
+
+            var colorName = SettingsStore.Get(SettingsStore.KeyPrimaryColor, "Blue");
+            var color = ThemeManager.GetColorFromName(colorName);
+            ThemeManager.SetPrimaryColor(color, save: false);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"加载保存的主题设置失败：{ex.Message}");
+        }
     }
 
     private static void StartCopawBackground()
