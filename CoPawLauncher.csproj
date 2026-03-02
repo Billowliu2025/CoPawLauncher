@@ -8,7 +8,13 @@
 
   <!-- 确保图标文件包含在项目中 -->
   <ItemGroup>
-    <Content Include="app.ico">
+    <Content Include="Assets\Copaw.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\CoTitle.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Copaw.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -9,7 +9,7 @@
         Title="CoPaw Launcher" 
         Height="650" Width="1000"
         WindowStartupLocation="CenterScreen"
-        Icon="app.ico"
+        Icon="Assets/CoTitle.ico"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
