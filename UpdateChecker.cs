@@ -48,7 +48,15 @@ public static class UpdateChecker
     {
         try
         {
-            var release = await _httpClient.GetFromJsonAsync<GitHubRelease>(LatestReleaseUrl);
+            // 先发送请求，检查响应状态码
+            var response = await _httpClient.GetAsync(LatestReleaseUrl);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return UpdateCheckResult.Failed("尚未发布任何版本，请关注 GitHub Releases 页面");
+
+            response.EnsureSuccessStatusCode();
+
+            var release = await response.Content.ReadFromJsonAsync<GitHubRelease>();
             if (release == null)
                 return UpdateCheckResult.Failed("无法获取版本信息");
 
@@ -84,7 +92,10 @@ public static class UpdateChecker
         catch (HttpRequestException ex)
         {
             Debug.WriteLine($"检查更新网络请求失败：{ex.Message}");
-            return UpdateCheckResult.Failed("网络连接失败，请检查网络设置");
+            var message = ex.StatusCode != null
+                ? $"服务器返回错误 ({ex.StatusCode})，请稍后重试"
+                : "网络连接失败，请检查网络设置";
+            return UpdateCheckResult.Failed(message);
         }
         catch (TaskCanceledException)
         {
