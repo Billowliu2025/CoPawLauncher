@@ -195,7 +195,8 @@
                     <StackPanel Margin="0,8,0,8">
                         <!-- 刷新 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
-                                Click="RefreshButton_Click">
+                                Click="RefreshButton_Click"
+                                ToolTip="刷新页面 (F5)">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="24"/>
@@ -219,7 +220,8 @@
                         
                         <!-- 不退出进程 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
-                                Click="SoftExitButton_Click">
+                                Click="SoftExitButton_Click"
+                                ToolTip="仅关闭窗口，CoPaw 服务继续运行">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="24"/>
@@ -230,25 +232,18 @@
                                                         Width="20" Height="20"
                                                         VerticalAlignment="Center"
                                                         HorizontalAlignment="Center"/>
-                                <StackPanel Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Margin="16,0,0,0">
-                                    <TextBlock Text="退出（保持服务）" 
-                                              VerticalAlignment="Center"
-                                              FontSize="14"
-                                              FontWeight="Medium"/>
-                                    <TextBlock Text="仅关闭窗口，CoPaw 服务继续运行" 
-                                              FontSize="11"
-                                              Opacity="0.6"
-                                              Margin="0,4,0,0"
-                                              TextWrapping="Wrap"/>
-                                </StackPanel>
+                                <TextBlock Grid.Column="1"
+                                          Text="退出（保持服务）" 
+                                          VerticalAlignment="Center"
+                                          Margin="16,0,0,0"
+                                          FontSize="14"/>
                             </Grid>
                         </Button>
                         
                         <!-- 强制退出 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
-                                Click="ForceExitButton_Click">
+                                Click="ForceExitButton_Click"
+                                ToolTip="关闭窗口并停止 CoPaw 服务">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="24"/>
@@ -260,20 +255,13 @@
                                                         Foreground="{DynamicResource SecondaryHueMidBrush}"
                                                         VerticalAlignment="Center"
                                                         HorizontalAlignment="Center"/>
-                                <StackPanel Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Margin="16,0,0,0">
-                                    <TextBlock Text="强制退出" 
-                                              VerticalAlignment="Center"
-                                              FontSize="14"
-                                              FontWeight="SemiBold"
-                                              Foreground="{DynamicResource SecondaryHueMidBrush}"/>
-                                    <TextBlock Text="关闭窗口并停止 CoPaw 服务" 
-                                              FontSize="11"
-                                              Opacity="0.6"
-                                              Margin="0,4,0,0"
-                                              TextWrapping="Wrap"/>
-                                </StackPanel>
+                                <TextBlock Grid.Column="1"
+                                          Text="强制退出" 
+                                          VerticalAlignment="Center"
+                                          Margin="16,0,0,0"
+                                          FontSize="14"
+                                          Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                          FontWeight="SemiBold"/>
                             </Grid>
                         </Button>
                         
@@ -281,7 +269,8 @@
                         
                         <!-- 关于 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
-                                Click="AboutButton_Click">
+                                Click="AboutButton_Click"
+                                ToolTip="查看应用信息">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="24"/>
@@ -294,7 +283,7 @@
                                                         VerticalAlignment="Center"
                                                         HorizontalAlignment="Center"/>
                                 <TextBlock Grid.Column="1"
-                                          Text="关于 CoPaw Launcher" 
+                                          Text="关于" 
                                           VerticalAlignment="Center"
                                           Margin="16,0,0,0"
                                           FontSize="14"/>
