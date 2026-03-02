@@ -181,5 +181,19 @@ public partial class MainWindow : Window
         await DialogHost.Show(aboutDialog, "RootDialog");
     }
 
+    private async void SettingsButton_Click(object? sender, RoutedEventArgs? e)
+    {
+        MainMenuPopup.IsOpen = false;
+        
+        var settingsDialog = new SettingsDialog();
+        var result = await DialogHost.Show(settingsDialog, "RootDialog");
+        
+        // 处理保存/取消结果（如果需要）
+        if (result is bool saved && saved)
+        {
+            statusText.Text = "设置已保存";
+        }
+    }
+
     #endregion
 }

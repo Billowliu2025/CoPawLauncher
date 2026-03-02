@@ -1,0 +1,237 @@
+<UserControl x:Class="CoPawLauncher.SettingsDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="450"
+             Width="450">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 标题 -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <materialDesign:PackIcon Kind="SettingsOutline" 
+                                    Width="48" Height="48"
+                                    Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+            <TextBlock Text="设置" 
+                       FontSize="24" 
+                       FontWeight="Bold"
+                       Margin="0,8,0,0"/>
+            <TextBlock Text="自定义应用外观和行为" 
+                       FontSize="14"
+                       Opacity="0.7"
+                       Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- 设置内容 -->
+        <ScrollViewer Grid.Row="1" 
+                      VerticalScrollBarVisibility="Auto"
+                      Margin="0,0,0,16">
+            <StackPanel>
+                <!-- 风格设置分组 -->
+                <Border Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,0,0,16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <materialDesign:PackIcon Kind="Palette" 
+                                                    Width="20" Height="20"
+                                                    Margin="0,0,8,0"
+                                                    Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                            <TextBlock Text="风格设置" 
+                                       FontSize="16"
+                                       FontWeight="SemiBold"/>
+                        </StackPanel>
+
+                        <!-- 主题模式 -->
+                        <TextBlock Text="主题模式" 
+                                   FontSize="13"
+                                   Margin="0,0,0,8"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                            <RadioButton x:Name="DarkThemeRadio"
+                                        GroupName="ThemeGroup"
+                                        Content="深色"
+                                        Margin="0,0,16,0"
+                                        Checked="DarkThemeRadio_Checked"
+                                        Style="{StaticResource MaterialDesignRadioButton}"/>
+                            <RadioButton x:Name="LightThemeRadio"
+                                        GroupName="ThemeGroup"
+                                        Content="浅色"
+                                        Checked="LightThemeRadio_Checked"
+                                        Style="{StaticResource MaterialDesignRadioButton}"/>
+                        </StackPanel>
+
+                        <!-- 主色调 -->
+                        <TextBlock Text="主色调" 
+                                   FontSize="13"
+                                   Margin="0,0,0,8"/>
+                        <WrapPanel Margin="0,0,0,16">
+                            <Border x:Name="ColorRed"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#F44336"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorRed_Click">
+                                <Border.ToolTip>红色</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorPink"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#E91E63"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorPink_Click">
+                                <Border.ToolTip>粉色</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorPurple"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#9C27B0"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorPurple_Click">
+                                <Border.ToolTip>紫色</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorDeepPurple"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#673AB7"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorDeepPurple_Click">
+                                <Border.ToolTip>深紫</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorIndigo"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#3F51B5"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorIndigo_Click">
+                                <Border.ToolTip>靛蓝</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorBlue"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#2196F3"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorBlue_Click">
+                                <Border.ToolTip>蓝色</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorLightBlue"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#03A9F4"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorLightBlue_Click">
+                                <Border.ToolTip>浅蓝</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorCyan"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#00BCD4"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorCyan_Click">
+                                <Border.ToolTip>青色</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorTeal"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#009688"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorTeal_Click">
+                                <Border.ToolTip>蓝绿</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorGreen"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#4CAF50"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorGreen_Click">
+                                <Border.ToolTip>绿色</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorLightGreen"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#8BC34A"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorLightGreen_Click">
+                                <Border.ToolTip>浅绿</Border.ToolTip>
+                            </Border>
+                            <Border x:Name="ColorOrange"
+                                   Width="40" Height="40"
+                                   CornerRadius="20"
+                                   Background="#FF9800"
+                                   Margin="0,0,8,8"
+                                   Cursor="Hand"
+                                   MouseLeftButtonUp="ColorOrange_Click">
+                                <Border.ToolTip>橙色</Border.ToolTip>
+                            </Border>
+                        </WrapPanel>
+
+                        <!-- 恢复默认 -->
+                        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Content="恢复默认设置"
+                                Click="ResetDefaults_Click"
+                                Padding="16,8"
+                                HorizontalAlignment="Left"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- 关于应用 -->
+                <Border Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                        CornerRadius="8"
+                        Padding="16">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <materialDesign:PackIcon Kind="Information" 
+                                                    Width="20" Height="20"
+                                                    Margin="0,0,8,0"
+                                                    Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                            <TextBlock Text="关于应用" 
+                                       FontSize="16"
+                                       FontWeight="SemiBold"/>
+                        </StackPanel>
+                        <TextBlock Text="CoPaw Launcher v1.0.0"
+                                   FontSize="13"
+                                   Opacity="0.8"/>
+                        <TextBlock Text="基于 .NET 10 + WPF + MaterialDesign"
+                                   FontSize="12"
+                                   Opacity="0.6"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- 按钮 -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button Style="{StaticResource MaterialDesignFlatButton}"
+                    Content="取消"
+                    Click="CancelButton_Click"
+                    Padding="16,8"
+                    Margin="0,0,8,0"/>
+            <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                    Content="保存"
+                    Click="SaveButton_Click"
+                    Padding="24,8"
+                    materialDesign:ButtonAssist.CornerRadius="8"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

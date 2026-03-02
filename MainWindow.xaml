@@ -267,6 +267,31 @@
                         
                         <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="8,8"/>
                         
+                        <!-- 设置 -->
+                        <Button Style="{StaticResource MenuButtonStyle}"
+                                Click="SettingsButton_Click"
+                                ToolTip="自定义主题和外观">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <materialDesign:PackIcon Kind="SettingsOutline" 
+                                                        Grid.Column="0"
+                                                        Width="20" Height="20"
+                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="1"
+                                          Text="设置" 
+                                          VerticalAlignment="Center"
+                                          Margin="16,0,0,0"
+                                          FontSize="14"/>
+                            </Grid>
+                        </Button>
+                        
+                        <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="8,8"/>
+                        
                         <!-- 关于 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
                                 Click="AboutButton_Click"
