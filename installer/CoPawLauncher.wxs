@@ -12,7 +12,7 @@
 
   <Package Name="CoPaw Launcher"
            Manufacturer="CoPaw"
-           Version="1.0.5.0"
+           Version="1.0.6.0"
            UpgradeCode="F4420D0C-A128-4BF1-9F32-415F88C56B1B"
            Compressed="yes"
            InstallerVersion="500"

@@ -22,6 +22,10 @@ public static class UpdateChecker
     private static readonly string LatestReleaseUrl =
         $"https://api.github.com/repos/{Owner}/{Repo}/releases/latest";
 
+    /// <summary>GitHub Web 页面最新 Release（用于重定向获取版本号，不消耗 API 限额）</summary>
+    private static readonly string LatestReleaseWebUrl =
+        $"https://github.com/{Owner}/{Repo}/releases/latest";
+
     /// <summary>用于 API 请求的全局 HttpClient</summary>
     private static readonly HttpClient _httpClient = CreateHttpClient();
 
@@ -43,8 +47,102 @@ public static class UpdateChecker
 
     /// <summary>
     /// 检查是否有新版本可用
+    /// 优先通过 GitHub 页面重定向获取版本号（无 API 限额），仅在需要下载详情时调用 API
     /// </summary>
     public static async Task<UpdateCheckResult> CheckForUpdateAsync()
+    {
+        try
+        {
+            if (!Version.TryParse(CurrentVersion, out var currentVersion))
+                return UpdateCheckResult.Failed($"无法解析当前版本号：{CurrentVersion}");
+
+            // 第一步：通过页面重定向快速获取最新版本号（不消耗 API 限额）
+            var latestTag = await GetLatestTagViaRedirectAsync();
+
+            if (latestTag != null)
+            {
+                var latestTagClean = latestTag.TrimStart('v', 'V');
+                if (!Version.TryParse(latestTagClean, out var latestVersion))
+                    return UpdateCheckResult.Failed($"无法解析版本号：{latestTag}");
+
+                // 当前已是最新版本，直接返回
+                if (latestVersion <= currentVersion)
+                {
+                    return new UpdateCheckResult
+                    {
+                        HasUpdate = false,
+                        LatestVersion = latestTagClean
+                    };
+                }
+
+                // 有新版本，尝试调用 API 获取下载详情
+                var apiResult = await GetReleaseDetailsViaApiAsync(latestTagClean, currentVersion);
+                return apiResult;
+            }
+
+            // 重定向方式失败，回退到 API 方式
+            return await GetReleaseDetailsViaApiAsync(null, currentVersion);
+        }
+        catch (HttpRequestException ex)
+        {
+            Debug.WriteLine($"检查更新网络请求失败：{ex.Message}");
+            var message = ex.StatusCode != null
+                ? $"服务器返回错误 ({ex.StatusCode})，请稍后重试"
+                : "网络连接失败，请检查网络设置";
+            return UpdateCheckResult.Failed(message);
+        }
+        catch (TaskCanceledException)
+        {
+            return UpdateCheckResult.Failed("请求超时，请稍后重试");
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"检查更新失败：{ex.Message}");
+            return UpdateCheckResult.Failed($"检查失败：{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 通过 GitHub 页面重定向获取最新版本标签（不消耗 API 限额）
+    /// 请求 /releases/latest 页面，服务端返回 302 重定向到 /releases/tag/vX.Y.Z
+    /// </summary>
+    private static async Task<string?> GetLatestTagViaRedirectAsync()
+    {
+        try
+        {
+            using var handler = new HttpClientHandler { AllowAutoRedirect = false };
+            using var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(15) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd($"CoPawLauncher/{CurrentVersion}");
+
+            var response = await client.GetAsync(LatestReleaseWebUrl);
+
+            if (response.StatusCode is System.Net.HttpStatusCode.Redirect
+                or System.Net.HttpStatusCode.MovedPermanently)
+            {
+                var location = response.Headers.Location?.ToString();
+                if (location != null)
+                {
+                    // URL 格式：https://github.com/.../releases/tag/v1.0.5
+                    var tagIndex = location.LastIndexOf("/tag/", StringComparison.Ordinal);
+                    if (tagIndex >= 0)
+                        return location[(tagIndex + 5)..];
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"重定向获取版本失败：{ex.Message}");
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// 通过 GitHub API 获取 Release 详细信息（包含下载链接等）
+    /// </summary>
+    /// <param name="knownLatestVersion">已知最新版本号（可为 null 表示需要 API 自行获取）</param>
+    /// <param name="currentVersion">当前版本</param>
+    private static async Task<UpdateCheckResult> GetReleaseDetailsViaApiAsync(
+        string? knownLatestVersion, Version currentVersion)
     {
         try
         {
@@ -52,6 +150,21 @@ public static class UpdateChecker
 
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 return UpdateCheckResult.Failed("尚未发布任何版本，请关注 GitHub Releases 页面");
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                // API 限额用尽，但如果已知有新版本，可引导用户到 Release 页面
+                if (knownLatestVersion != null)
+                {
+                    return new UpdateCheckResult
+                    {
+                        HasUpdate = true,
+                        LatestVersion = knownLatestVersion,
+                        ReleasePageUrl = $"https://github.com/{Owner}/{Repo}/releases/latest"
+                    };
+                }
+                return UpdateCheckResult.Failed("GitHub API 请求频率超限，请稍后重试（约 1 分钟）");
+            }
 
             response.EnsureSuccessStatusCode();
 
@@ -62,9 +175,6 @@ public static class UpdateChecker
             var latestTag = release.TagName?.TrimStart('v', 'V') ?? "";
             if (!Version.TryParse(latestTag, out var latestVersion))
                 return UpdateCheckResult.Failed($"无法解析版本号：{release.TagName}");
-
-            if (!Version.TryParse(CurrentVersion, out var currentVersion))
-                return UpdateCheckResult.Failed($"无法解析当前版本号：{CurrentVersion}");
 
             if (latestVersion > currentVersion)
             {
@@ -89,22 +199,18 @@ public static class UpdateChecker
                 LatestVersion = latestTag
             };
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
         {
-            Debug.WriteLine($"检查更新网络请求失败：{ex.Message}");
-            var message = ex.StatusCode != null
-                ? $"服务器返回错误 ({ex.StatusCode})，请稍后重试"
-                : "网络连接失败，请检查网络设置";
-            return UpdateCheckResult.Failed(message);
-        }
-        catch (TaskCanceledException)
-        {
-            return UpdateCheckResult.Failed("请求超时，请稍后重试");
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"检查更新失败：{ex.Message}");
-            return UpdateCheckResult.Failed($"检查失败：{ex.Message}");
+            if (knownLatestVersion != null)
+            {
+                return new UpdateCheckResult
+                {
+                    HasUpdate = true,
+                    LatestVersion = knownLatestVersion,
+                    ReleasePageUrl = $"https://github.com/{Owner}/{Repo}/releases/latest"
+                };
+            }
+            return UpdateCheckResult.Failed("GitHub API 请求频率超限，请稍后重试");
         }
     }
 
