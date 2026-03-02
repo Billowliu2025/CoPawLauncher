@@ -6,16 +6,6 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2210.55" />
   </ItemGroup>
 
-  <!-- 发布优化：IL Trimming 裁剪未使用的代码 -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>partial</TrimMode>
-    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
-    <_SuppressWPFTrimError>true</_SuppressWPFTrimError>
-    <DebuggerSupport>false</DebuggerSupport>
-    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
-  </PropertyGroup>
-
   <!-- 确保图标文件包含在项目中 -->
   <ItemGroup>
     <Content Include="Assets\Copaw.ico">
