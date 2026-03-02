@@ -10,6 +10,7 @@
 - ✅ **快速访问** - 一键启动 CoPaw 聊天界面
 - ✅ **优雅退出** - 点击退出按钮可同时停止后台 CoPaw 服务
 - ✅ **键盘快捷键** - 支持 F5 刷新、Esc 退出
+- ✅ **自定义图标** - 应用程序和桌面快捷方式均使用自定义图标
 
 ## 系统要求
 
@@ -61,6 +62,13 @@ CoPawLauncher/
 ├── MainWindow.xaml.cs    # 主窗口逻辑（WebView2 初始化）
 ├── AssemblyInfo.cs       # 程序集信息
 ├── CoPawLauncher.csproj  # 项目文件
+├── app.ico               # 应用程序图标（多尺寸）
+├── logo.png              # 原始 Logo 图片
+├── convert_icon.py       # 图标转换脚本
+├── build.bat             # 构建脚本
+├── run.bat               # 启动脚本
+├── publish.bat           # 发布脚本
+├── create-shortcut.bat   # 创建桌面快捷方式（带图标）
 └── README.md             # 说明文档
 ```
 
@@ -84,6 +92,25 @@ CoPawLauncher/
 | `F5` | 刷新页面 |
 | `Esc` | 退出程序 |
 | `Alt+F4` | 退出程序 |
+
+## 图标说明
+
+### 图标文件
+- **logo.png**: 原始 PNG 格式的 Logo 图片
+- **app.ico**: 多尺寸 ICO 图标文件（包含 16x16 到 256x256 共 7 种尺寸）
+
+### 更换图标
+如果想使用自己的图标：
+1. 准备一张 PNG 图片（建议 512x512 或更大）
+2. 命名为 `logo.png` 并替换项目中的文件
+3. 运行 `python convert_icon.py` 生成新的 ICO 文件
+4. 重新构建项目：`dotnet build`
+
+### 图标用途
+- ✅ 应用程序窗口标题栏图标
+- ✅ 任务栏图标
+- ✅ 桌面快捷方式图标
+- ✅ 文件资源管理器中的程序图标
 
 ## 自定义
 
