@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Web.WebView2.Core;
+using MaterialDesignThemes.Wpf;
 
 namespace CoPawLauncher;
 
@@ -17,6 +18,8 @@ namespace CoPawLauncher;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private bool _isMaximized = false;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -39,10 +42,12 @@ public partial class MainWindow : Window
                 if (args.IsSuccess)
                 {
                     statusText.Text = "CoPaw 已就绪";
+                    StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.CheckCircle;
                 }
                 else
                 {
                     statusText.Text = $"加载失败：{args.WebErrorStatus}";
+                    StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.AlertCircle;
                 }
             };
 
@@ -55,6 +60,7 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             statusText.Text = $"初始化失败：{ex.Message}";
+            StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.AlertCircle;
             MessageBox.Show($"WebView2 初始化失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -70,32 +76,82 @@ public partial class MainWindow : Window
         // Alt+F4 退出（默认已支持，这里显式处理）
         else if (e.Key == Key.F4 && Keyboard.Modifiers == ModifierKeys.Alt)
         {
-            ExitButton_Click(null, null);
+            Close();
             e.Handled = true;
         }
-        // Esc 也可以退出
+        // Esc 关闭菜单
         else if (e.Key == Key.Escape)
         {
-            ExitButton_Click(null, null);
+            MainMenuPopup.IsOpen = false;
             e.Handled = true;
         }
+    }
+
+    #region 窗口控制按钮
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        this.WindowState = WindowState.Minimized;
+    }
+
+    private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (_isMaximized)
+        {
+            this.WindowState = WindowState.Normal;
+            MaximizeIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.WindowMaximize;
+            _isMaximized = false;
+        }
+        else
+        {
+            this.WindowState = WindowState.Maximized;
+            MaximizeIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.WindowRestore;
+            _isMaximized = true;
+        }
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        // 默认关闭窗口，不退出进程
+        SoftExitButton_Click(sender, e);
+    }
+
+    #endregion
+
+    #region 菜单功能
+
+    private void MenuButton_Click(object sender, RoutedEventArgs e)
+    {
+        MainMenuPopup.IsOpen = !MainMenuPopup.IsOpen;
     }
 
     private void RefreshButton_Click(object? sender, RoutedEventArgs? e)
     {
+        MainMenuPopup.IsOpen = false;
+        
         if (webView.CoreWebView2 != null)
         {
             webView.CoreWebView2.Reload();
             statusText.Text = "正在刷新...";
+            StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Refresh;
         }
     }
 
-    private void ExitButton_Click(object? sender, RoutedEventArgs? e)
+    private void SoftExitButton_Click(object? sender, RoutedEventArgs? e)
     {
+        MainMenuPopup.IsOpen = false;
+        // 仅关闭窗口，不退出 copaw 进程
+        this.Close();
+    }
+
+    private async void ForceExitButton_Click(object? sender, RoutedEventArgs? e)
+    {
+        MainMenuPopup.IsOpen = false;
+        
         // 确认退出
         var result = MessageBox.Show(
-            "确定要退出 CoPaw Launcher 吗？\n\n这将同时停止后台运行的 CoPaw 服务。",
-            "确认退出",
+            "确定要强制退出 CoPaw Launcher 吗？\n\n这将同时停止后台运行的 CoPaw 服务。",
+            "确认强制退出",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question,
             MessageBoxResult.No);
@@ -104,12 +160,26 @@ public partial class MainWindow : Window
         {
             // 更新状态
             statusText.Text = "正在退出...";
+            StatusIcon.Kind = MaterialDesignThemes.Wpf.PackIconKind.Loading;
             
             // 停止 Copaw 进程
             App.StopCopawProcess();
+            
+            // 稍微延迟以显示状态
+            await Task.Delay(500);
             
             // 关闭主窗口
             Application.Current.Shutdown();
         }
     }
+
+    private async void AboutButton_Click(object? sender, RoutedEventArgs? e)
+    {
+        MainMenuPopup.IsOpen = false;
+        
+        var aboutDialog = new AboutDialog();
+        await DialogHost.Show(aboutDialog, "RootDialog");
+    }
+
+    #endregion
 }

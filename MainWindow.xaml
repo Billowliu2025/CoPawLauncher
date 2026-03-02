@@ -4,86 +4,244 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
         Title="CoPaw Launcher" 
-        Height="600" Width="900"
+        Height="650" Width="1000"
         WindowStartupLocation="CenterScreen"
-        Icon="app.ico">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        Icon="app.ico"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="Auto"
+        WindowStyle="None"
+        AllowsTransparency="True">
+    
+    <Window.Resources>
+        <!-- 下拉菜单按钮样式 -->
+        <Style x:Key="MenuButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+    </Window.Resources>
 
-        <!-- 标题栏 -->
-        <Border Grid.Row="0" Background="#2D2D30" Padding="15,10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+    <materialDesign:DialogHost Identifier="RootDialog">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 标题栏（带阴影） -->
+            <Border Grid.Row="0" 
+                    Background="{DynamicResource PrimaryHueMidBrush}"
+                    Padding="0,0,0,0"
+                    x:Name="TitleBar">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="10" 
+                                     ShadowDepth="2" 
+                                     Opacity="0.3"/>
+                </Border.Effect>
                 
-                <TextBlock Grid.Column="0"
-                           Text="CoPaw 快捷启动器" 
-                           FontSize="18" 
-                           FontWeight="Bold" 
-                           Foreground="White"
-                           VerticalAlignment="Center"/>
-                
-                <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
-                            Margin="10,0,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 左上角菜单按钮 -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <!-- 菜单按钮 -->
+                        <Button x:Name="MenuButton"
+                                Style="{StaticResource MaterialDesignIconButton}"
+                                Click="MenuButton_Click"
+                                ToolTip="菜单"
+                                Margin="8,8,0,8"
+                                Foreground="White">
+                            <materialDesign:PackIcon Kind="Menu" Width="24" Height="24"/>
+                        </Button>
+                        
+                        <!-- 应用标题 -->
+                        <TextBlock Text="CoPaw 快捷启动器" 
+                                   FontSize="20" 
+                                   FontWeight="Bold" 
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   Margin="12,0,0,0"/>
+                    </StackPanel>
+
+                    <!-- 窗口控制按钮 -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                Click="MinimizeButton_Click"
+                                ToolTip="最小化"
+                                Margin="0,8,0,8"
+                                Foreground="White">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Width="20" Height="20"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                Click="MaximizeButton_Click"
+                                ToolTip="最大化/还原"
+                                Margin="0,8,0,8"
+                                Foreground="White">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Width="20" Height="20" x:Name="MaximizeIcon"/>
+                        </Button>
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
+                                Click="CloseButton_Click"
+                                ToolTip="关闭"
+                                Margin="0,8,8,8"
+                                Foreground="White">
+                            <materialDesign:PackIcon Kind="Close" Width="20" Height="20"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- WebView2 浏览器 -->
+            <wv2:WebView2 Grid.Row="1" 
+                          Name="webView"
+                          Margin="0"
+                          Source="http://127.0.0.1:8088/chat"/>
+
+            <!-- 状态栏 -->
+            <Border Grid.Row="2" 
+                    Background="{DynamicResource PrimaryHueLightBrush}"
+                    Padding="16,8">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
                     
-                    <!-- 刷新按钮 -->
-                    <Button Content="刷新" 
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="CheckCircle" 
+                                                Foreground="White" 
+                                                VerticalAlignment="Center"
+                                                Margin="0,0,8,0"
+                                                Width="20" Height="20"
+                                                x:Name="StatusIcon"/>
+                        <TextBlock Text="状态：" 
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   FontSize="14"/>
+                    </StackPanel>
+                    
+                    <TextBlock Grid.Column="1" 
+                               Name="statusText"
+                               Text="正在加载 CoPaw..." 
+                               Foreground="White"
+                               VerticalAlignment="Center"
+                               FontSize="14"
+                               Margin="8,0,0,0"/>
+                    
+                    <Button Grid.Column="2" 
+                            Style="{StaticResource MaterialDesignRaisedButton}"
                             Click="RefreshButton_Click"
-                            Padding="15,8"
-                            Margin="0,0,10,0"
-                            Background="#007ACC"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            ToolTip="刷新页面 (F5)"/>
-                    
-                    <!-- 退出按钮 -->
-                    <Button Content="退出" 
-                            Click="ExitButton_Click"
-                            Padding="15,8"
-                            Background="#E81123"
-                            Foreground="White"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            FontWeight="Bold"
-                            ToolTip="退出程序并停止 CoPaw 服务"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+                            ToolTip="刷新页面 (F5)"
+                            Padding="16,8"
+                            materialDesign:ButtonAssist.CornerRadius="8">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Refresh" 
+                                                    Margin="0,0,8,0"
+                                                    Width="18" Height="18"/>
+                            <TextBlock Text="刷新"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
 
-        <!-- WebView2 浏览器 -->
-        <wv2:WebView2 Grid.Row="1" 
-                      Name="webView"
-                      Margin="0"
-                      Source="http://127.0.0.1:8088/chat"/>
-
-        <!-- 状态栏 -->
-        <Border Grid.Row="2" Background="#007ACC" Padding="10,5">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                
-                <TextBlock Grid.Column="0" 
-                           Text="状态：" 
-                           Foreground="White"
-                           Margin="0,0,5,0"/>
-                
-                <TextBlock Grid.Column="1" 
-                           Name="statusText"
-                           Text="正在加载 CoPaw..." 
-                           Foreground="White"/>
-            </Grid>
-        </Border>
-    </Grid>
+            <!-- 下拉菜单 -->
+            <Popup x:Name="MainMenuPopup"
+                   PlacementTarget="{Binding ElementName=MenuButton}"
+                   Placement="Bottom"
+                   StaysOpen="False"
+                   PopupAnimation="Fade"
+                   AllowsTransparency="True"
+                   VerticalOffset="5"
+                   HorizontalOffset="8">
+                <Border Background="{DynamicResource MaterialDesignPaper}"
+                        BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        MinWidth="280"
+                        Effect="{StaticResource MaterialDesignShadowDepth4}">
+                    <StackPanel>
+                        <!-- 刷新 -->
+                        <Button Style="{StaticResource MenuButtonStyle}"
+                                Click="RefreshButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Refresh" 
+                                                        Margin="0,0,12,0"
+                                                        Width="20" Height="20"
+                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="刷新页面" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="8,4"/>
+                        
+                        <!-- 不退出进程 -->
+                        <Button Style="{StaticResource MenuButtonStyle}"
+                                Click="SoftExitButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="LogoutVariant" 
+                                                        Margin="0,0,12,0"
+                                                        Width="20" Height="20"/>
+                                <StackPanel>
+                                    <TextBlock Text="退出（保持服务）" VerticalAlignment="Center"/>
+                                    <TextBlock Text="仅关闭窗口，CoPaw 服务继续运行" 
+                                              FontSize="11"
+                                              Opacity="0.6"
+                                              Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Button>
+                        
+                        <!-- 强制退出 -->
+                        <Button Style="{StaticResource MenuButtonStyle}"
+                                Click="ForceExitButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="PowerOff" 
+                                                        Margin="0,0,12,0"
+                                                        Width="20" Height="20"
+                                                        Foreground="{DynamicResource SecondaryHueMidBrush}"/>
+                                <StackPanel>
+                                    <TextBlock Text="强制退出" 
+                                              VerticalAlignment="Center"
+                                              Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                              FontWeight="SemiBold"/>
+                                    <TextBlock Text="关闭窗口并停止 CoPaw 服务" 
+                                              FontSize="11"
+                                              Opacity="0.6"
+                                              Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Button>
+                        
+                        <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="8,4"/>
+                        
+                        <!-- 关于 -->
+                        <Button Style="{StaticResource MenuButtonStyle}"
+                                Click="AboutButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Information" 
+                                                        Margin="0,0,12,0"
+                                                        Width="20" Height="20"
+                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
+                                <TextBlock Text="关于 CoPaw Launcher" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Popup>
+        </Grid>
+    </materialDesign:DialogHost>
 </Window>
