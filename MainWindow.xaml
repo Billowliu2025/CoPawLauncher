@@ -24,9 +24,28 @@
         <Style x:Key="MenuButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="16,16"/>
+            <Setter Property="MinHeight" Value="56"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource MaterialDesignTextFieldBoxHoverBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
@@ -173,71 +192,113 @@
                         CornerRadius="8"
                         MinWidth="280"
                         Effect="{StaticResource MaterialDesignShadowDepth4}">
-                    <StackPanel>
+                    <StackPanel Margin="0,8,0,8">
                         <!-- 刷新 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
                                 Click="RefreshButton_Click">
-                            <StackPanel Orientation="Horizontal">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
                                 <materialDesign:PackIcon Kind="Refresh" 
-                                                        Margin="0,0,12,0"
+                                                        Grid.Column="0"
                                                         Width="20" Height="20"
-                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                <TextBlock Text="刷新页面" VerticalAlignment="Center"/>
-                            </StackPanel>
+                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="1"
+                                          Text="刷新页面" 
+                                          VerticalAlignment="Center"
+                                          Margin="16,0,0,0"
+                                          FontSize="14"/>
+                            </Grid>
                         </Button>
                         
-                        <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="8,4"/>
+                        <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="8,8"/>
                         
                         <!-- 不退出进程 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
                                 Click="SoftExitButton_Click">
-                            <StackPanel Orientation="Horizontal">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
                                 <materialDesign:PackIcon Kind="LogoutVariant" 
-                                                        Margin="0,0,12,0"
-                                                        Width="20" Height="20"/>
-                                <StackPanel>
-                                    <TextBlock Text="退出（保持服务）" VerticalAlignment="Center"/>
+                                                        Grid.Column="0"
+                                                        Width="20" Height="20"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"/>
+                                <StackPanel Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           Margin="16,0,0,0">
+                                    <TextBlock Text="退出（保持服务）" 
+                                              VerticalAlignment="Center"
+                                              FontSize="14"
+                                              FontWeight="Medium"/>
                                     <TextBlock Text="仅关闭窗口，CoPaw 服务继续运行" 
                                               FontSize="11"
                                               Opacity="0.6"
-                                              Margin="0,2,0,0"/>
+                                              Margin="0,4,0,0"
+                                              TextWrapping="Wrap"/>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </Button>
                         
                         <!-- 强制退出 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
                                 Click="ForceExitButton_Click">
-                            <StackPanel Orientation="Horizontal">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
                                 <materialDesign:PackIcon Kind="PowerOff" 
-                                                        Margin="0,0,12,0"
+                                                        Grid.Column="0"
                                                         Width="20" Height="20"
-                                                        Foreground="{DynamicResource SecondaryHueMidBrush}"/>
-                                <StackPanel>
+                                                        Foreground="{DynamicResource SecondaryHueMidBrush}"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"/>
+                                <StackPanel Grid.Column="1"
+                                           VerticalAlignment="Center"
+                                           Margin="16,0,0,0">
                                     <TextBlock Text="强制退出" 
                                               VerticalAlignment="Center"
-                                              Foreground="{DynamicResource SecondaryHueMidBrush}"
-                                              FontWeight="SemiBold"/>
+                                              FontSize="14"
+                                              FontWeight="SemiBold"
+                                              Foreground="{DynamicResource SecondaryHueMidBrush}"/>
                                     <TextBlock Text="关闭窗口并停止 CoPaw 服务" 
                                               FontSize="11"
                                               Opacity="0.6"
-                                              Margin="0,2,0,0"/>
+                                              Margin="0,4,0,0"
+                                              TextWrapping="Wrap"/>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </Button>
                         
-                        <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="8,4"/>
+                        <Separator Background="{DynamicResource MaterialDesignDivider}" Margin="8,8"/>
                         
                         <!-- 关于 -->
                         <Button Style="{StaticResource MenuButtonStyle}"
                                 Click="AboutButton_Click">
-                            <StackPanel Orientation="Horizontal">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="24"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
                                 <materialDesign:PackIcon Kind="Information" 
-                                                        Margin="0,0,12,0"
+                                                        Grid.Column="0"
                                                         Width="20" Height="20"
-                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                                <TextBlock Text="关于 CoPaw Launcher" VerticalAlignment="Center"/>
-                            </StackPanel>
+                                                        Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                        VerticalAlignment="Center"
+                                                        HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="1"
+                                          Text="关于 CoPaw Launcher" 
+                                          VerticalAlignment="Center"
+                                          Margin="16,0,0,0"
+                                          FontSize="14"/>
+                            </Grid>
                         </Button>
                     </StackPanel>
                 </Border>
