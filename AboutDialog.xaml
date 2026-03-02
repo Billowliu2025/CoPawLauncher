@@ -5,14 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="400"
-             Width="400"
+             d:DesignHeight="460" d:DesignWidth="420"
+             Width="420"
              TextElement.Foreground="{DynamicResource MaterialDesignBody}"
              Background="{DynamicResource MaterialDesignPaper}">
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
@@ -26,7 +27,8 @@
                        FontWeight="Bold"
                        HorizontalAlignment="Center"
                        Margin="0,8,0,0"/>
-            <TextBlock Text="版本 1.0.0" 
+            <TextBlock x:Name="VersionText"
+                       Text="版本 1.0.0" 
                        FontSize="14"
                        Opacity="0.7"
                        HorizontalAlignment="Center"/>
@@ -37,7 +39,7 @@
                 Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
                 CornerRadius="8"
                 Padding="16"
-                Margin="0,0,0,16">
+                Margin="0,0,0,12">
             <StackPanel>
                 <TextBlock Text="CoPaw 快捷启动器" 
                            FontSize="16"
@@ -86,8 +88,71 @@
             </StackPanel>
         </Border>
 
+        <!-- 版本更新检查区域 -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
+                CornerRadius="8"
+                Padding="12"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 状态图标 -->
+                <materialDesign:PackIcon x:Name="UpdateIcon"
+                                        Kind="Update"
+                                        Grid.Column="0"
+                                        Width="20" Height="20"
+                                        Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,10,0"/>
+
+                <!-- 检查中的加载动画 -->
+                <ProgressBar x:Name="UpdateProgress"
+                             Grid.Column="0"
+                             Style="{StaticResource MaterialDesignCircularProgressBar}"
+                             IsIndeterminate="True"
+                             Width="20" Height="20"
+                             VerticalAlignment="Center"
+                             Margin="0,0,10,0"
+                             Visibility="Collapsed"/>
+
+                <!-- 状态文字 -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="UpdateStatusText"
+                               Text="点击检查是否有新版本"
+                               FontSize="13"
+                               TextWrapping="Wrap"/>
+                    <!-- 有新版本时显示下载链接 -->
+                    <TextBlock x:Name="UpdateDownloadLink"
+                               FontSize="12"
+                               Margin="0,4,0,0"
+                               Visibility="Collapsed">
+                        <Hyperlink x:Name="DownloadHyperlink"
+                                   RequestNavigate="DownloadLink_RequestNavigate">
+                            <Run x:Name="DownloadLinkText" Text="前往下载"/>
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- 检查按钮 -->
+                <Button x:Name="CheckUpdateButton"
+                        Grid.Column="2"
+                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                        Click="CheckUpdateButton_Click"
+                        Padding="12,4"
+                        Height="32"
+                        materialDesign:ButtonAssist.CornerRadius="6"
+                        VerticalAlignment="Center"
+                        Content="检查更新"/>
+            </Grid>
+        </Border>
+
         <!-- 关闭按钮 -->
-        <Button Grid.Row="2"
+        <Button Grid.Row="3"
                 Style="{StaticResource MaterialDesignRaisedButton}"
                 HorizontalAlignment="Right"
                 Click="CloseButton_Click"

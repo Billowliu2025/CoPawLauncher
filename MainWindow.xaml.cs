@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Web.WebView2.Core;
 using MaterialDesignThemes.Wpf;
 
@@ -24,10 +25,38 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ApplyCustomIcon();
         InitializeWebView();
         
         // 添加键盘快捷键处理
         KeyDown += MainWindow_KeyDown;
+    }
+
+    /// <summary>
+    /// 加载并应用自定义图标（如果存在）
+    /// </summary>
+    public void ApplyCustomIcon()
+    {
+        try
+        {
+            var iconFile = SettingsStore.Get(SettingsStore.KeyCustomIconFile);
+            if (string.IsNullOrEmpty(iconFile)) return;
+
+            var iconPath = Path.Combine(SettingsStore.DataFolder, iconFile);
+            if (!File.Exists(iconPath)) return;
+
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(iconPath, UriKind.Absolute);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            Icon = bitmap;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"加载自定义图标失败：{ex.Message}");
+        }
     }
 
     private async void InitializeWebView()
@@ -190,9 +219,10 @@ public partial class MainWindow : Window
         var settingsDialog = new SettingsDialog();
         var result = await DialogHost.Show(settingsDialog, "RootDialog");
         
-        // 处理保存/取消结果（如果需要）
+        // 处理保存结果：立即应用图标
         if (result is bool saved && saved)
         {
+            ApplyCustomIcon();
             StatusText.Text = "设置已保存";
         }
     }

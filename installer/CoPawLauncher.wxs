@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  CoPaw Launcher MSI 安装包定义
+  使用 WiX Toolset v5 构建
+  
+  构建方式：运行 installer\build-msi.bat
+-->
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="CoPaw Launcher"
+           Manufacturer="CoPaw"
+           Version="1.0.1.0"
+           UpgradeCode="F4420D0C-A128-4BF1-9F32-415F88C56B1B"
+           Compressed="yes"
+           InstallerVersion="500"
+           Scope="perUser"
+           Codepage="936">
+
+    <!-- 升级策略：主版本升级时自动卸载旧版本 -->
+    <MajorUpgrade DowngradeErrorMessage="已安装了更新版本的 CoPaw Launcher，请先卸载。" />
+
+    <!-- 内嵌 cab 文件到 MSI -->
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- ===== 安装目录结构 ===== -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="COMPANYDIR" Name="CoPaw">
+        <Directory Id="INSTALLFOLDER" Name="CoPaw Launcher" />
+      </Directory>
+    </StandardDirectory>
+
+    <!-- ===== 开始菜单快捷方式 ===== -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ProgramMenuCoPaw" Name="CoPaw Launcher" />
+    </StandardDirectory>
+
+    <!-- ===== 桌面快捷方式目录 ===== -->
+    <StandardDirectory Id="DesktopFolder" />
+
+    <!-- ===== 文件组件 ===== -->
+    <ComponentGroup Id="ProductFiles" Directory="INSTALLFOLDER">
+      <!-- 主程序（自动收集发布目录下所有文件） -->
+      <Files Include="publish\**" />
+    </ComponentGroup>
+
+    <!-- ===== 快捷方式组件 ===== -->
+    <Component Id="StartMenuShortcut" Directory="ProgramMenuCoPaw" Guid="DBC7F369-5673-4B90-AD54-D5C9168A188B">
+      <Shortcut Id="StartMenuLink"
+                Name="CoPaw Launcher"
+                Description="CoPaw 快捷启动器"
+                Target="[INSTALLFOLDER]CoPawLauncher.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon" />
+      <RemoveFolder Id="RemoveStartMenuDir" On="uninstall" />
+      <RegistryValue Root="HKCU" Key="Software\CoPaw\CoPawLauncher"
+                     Name="StartMenu" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <Component Id="DesktopShortcut" Directory="DesktopFolder" Guid="B664CE68-C54B-4E96-8F9F-A94CFE4C062C">
+      <Shortcut Id="DesktopLink"
+                Name="CoPaw Launcher"
+                Description="CoPaw 快捷启动器"
+                Target="[INSTALLFOLDER]CoPawLauncher.exe"
+                WorkingDirectory="INSTALLFOLDER"
+                Icon="AppIcon" />
+      <RegistryValue Root="HKCU" Key="Software\CoPaw\CoPawLauncher"
+                     Name="Desktop" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+
+    <!-- ===== 图标 ===== -->
+    <Icon Id="AppIcon" SourceFile="..\app.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+
+    <!-- ===== 功能定义 ===== -->
+    <Feature Id="Complete" Title="CoPaw Launcher" Level="1">
+      <ComponentGroupRef Id="ProductFiles" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <!-- ===== 安装向导 UI ===== -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+
+    <!-- 许可协议（可选，如无则跳过许可页面） -->
+    <!-- <WixVariable Id="WixUILicenseRtf" Value="installer\license.rtf" /> -->
+
+  </Package>
+
+</Wix>

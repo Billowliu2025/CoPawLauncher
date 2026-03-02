@@ -123,5 +123,13 @@ public static class SettingsStore
     /// <summary>主色调名称</summary>
     public const string KeyPrimaryColor = "PrimaryColor";
 
+    /// <summary>自定义图标文件名</summary>
+    public const string KeyCustomIconFile = "CustomIconFile";
+
+    /// <summary>
+    /// 获取持久化存储目录（%LOCALAPPDATA%\CoPawLauncher\)
+    /// </summary>
+    public static string DataFolder => _dbFolder;
+
     #endregion
 }

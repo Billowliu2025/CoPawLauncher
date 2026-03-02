@@ -40,6 +40,15 @@ packages/
 # Publish
 publish/
 
+# Installer output
+installer/publish/
+installer/*.msi
+installer/*.wixpdb
+
+# WiX 扩展缓存（本地工具，勿提交）
+.wix/
+installer/.wix/
+
 # Windows shortcut
 *.lnk
 

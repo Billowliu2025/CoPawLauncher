@@ -52,21 +52,19 @@ public partial class SettingsDialog : UserControl
     {
         try
         {
-            // 检查是否有自定义图标
-            var appPath = AppDomain.CurrentDomain.BaseDirectory;
-            var customIconPath = Path.Combine(appPath, "custom_icon.png");
-            
-            if (File.Exists(customIconPath))
+            var iconFile = SettingsStore.Get(SettingsStore.KeyCustomIconFile);
+            if (!string.IsNullOrEmpty(iconFile))
             {
-                _customIconPath = customIconPath;
-                DisplayIconPreview(customIconPath);
-                IconFilePathText.Text = $"当前图标：custom_icon.png";
+                var iconPath = Path.Combine(SettingsStore.DataFolder, iconFile);
+                if (File.Exists(iconPath))
+                {
+                    _customIconPath = iconPath;
+                    DisplayIconPreview(iconPath);
+                    IconFilePathText.Text = $"当前图标：{iconFile}";
+                    return;
+                }
             }
-            else
-            {
-                // 使用默认图标
-                IconFilePathText.Text = "当前图标：默认图标";
-            }
+            IconFilePathText.Text = "当前图标：默认图标";
         }
         catch
         {
@@ -223,23 +221,19 @@ public partial class SettingsDialog : UserControl
                         MessageBoxImage.Warning);
                 }
                 
-                // 复制图片到应用目录
-                var appPath = AppDomain.CurrentDomain.BaseDirectory;
-                var destPath = Path.Combine(appPath, "custom_icon.png");
+                // 复制图片到持久化目录
+                var destPath = Path.Combine(SettingsStore.DataFolder, "custom_icon.png");
                 
                 // 转换为 PNG 格式
                 ConvertToPng(selectedPath, destPath);
+                
+                // 保存到 SQLite
+                SettingsStore.Set(SettingsStore.KeyCustomIconFile, "custom_icon.png");
                 
                 // 更新预览
                 _customIconPath = destPath;
                 DisplayIconPreview(destPath);
                 IconFilePathText.Text = $"已选择：{Path.GetFileName(selectedPath)}";
-                
-                MessageBox.Show(
-                    "图标已更新！\n\n注意：需要重启应用程序才能看到完整效果。\n桌面快捷方式图标可能需要重新创建。",
-                    "提示",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
@@ -291,11 +285,13 @@ public partial class SettingsDialog : UserControl
             ThemeManager.SetPrimaryColor(ThemeManager.GetColorFromName("Blue"));
             
             // 删除自定义图标
-            var appPath = AppDomain.CurrentDomain.BaseDirectory;
-            var customIconPath = Path.Combine(appPath, "custom_icon.png");
-            if (File.Exists(customIconPath))
+            var iconFile = SettingsStore.Get(SettingsStore.KeyCustomIconFile);
+            if (!string.IsNullOrEmpty(iconFile))
             {
-                File.Delete(customIconPath);
+                var iconPath = Path.Combine(SettingsStore.DataFolder, iconFile);
+                if (File.Exists(iconPath))
+                    File.Delete(iconPath);
+                SettingsStore.Set(SettingsStore.KeyCustomIconFile, "");
                 _customIconPath = null;
                 IconFilePathText.Text = "当前图标：默认图标";
                 CurrentIconPreview.Source = null;
