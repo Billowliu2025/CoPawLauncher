@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace CoPawLauncher;
 
@@ -20,8 +22,47 @@ public partial class App : Application
         SettingsStore.Initialize();
         LoadSavedTheme();
         
+        // 加载自定义图标
+        LoadCustomIcon();
+        
         // 在后台启动 copaw 进程
         StartCopawBackground();
+    }
+
+    /// <summary>
+    /// 加载自定义图标（如果存在）
+    /// </summary>
+    private void LoadCustomIcon()
+    {
+        try
+        {
+            var appPath = AppDomain.CurrentDomain.BaseDirectory;
+            var customIconPath = Path.Combine(appPath, "custom_icon.png");
+            
+            if (File.Exists(customIconPath))
+            {
+                // 设置窗口图标 - 在 MainWindow 加载后设置
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (MainWindow != null)
+                        {
+                            MainWindow.Icon = new System.Windows.Media.Imaging.BitmapImage(
+                                new Uri(customIconPath, UriKind.Absolute));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"设置窗口图标失败：{ex.Message}");
+                    }
+                }));
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"加载自定义图标失败：{ex.Message}");
+        }
     }
 
     /// <summary>

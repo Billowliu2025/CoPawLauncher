@@ -1,8 +1,11 @@
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using Microsoft.Win32;
 using MaterialDesignThemes.Wpf;
 
 namespace CoPawLauncher;
@@ -13,33 +16,28 @@ namespace CoPawLauncher;
 public partial class SettingsDialog : UserControl
 {
     private string _currentColor = "Blue";
-
-    /// <summary>
-    /// 打开对话框时记录的原始状态，用于取消时回滚
-    /// </summary>
-    private readonly bool _originalIsDark;
-    private readonly string _originalColor;
+    private string? _customIconPath = null;
 
     public SettingsDialog()
     {
         InitializeComponent();
-
-        // 记录当前状态用于取消回滚
-        _originalIsDark = ThemeManager.IsDarkTheme();
-        _originalColor = SettingsStore.Get(SettingsStore.KeyPrimaryColor, "Blue");
-
-        // 加载已保存的颜色高亮
-        HighlightSelectedColor(_originalColor);
-
+        
+        // 默认高亮蓝色
+        HighlightSelectedColor("Blue");
+        
         // 加载当前主题状态
         LoadCurrentTheme();
+        
+        // 加载当前图标
+        LoadCurrentIcon();
     }
 
     private void LoadCurrentTheme()
     {
         try
         {
-            if (_originalIsDark)
+            var isDark = ThemeManager.IsDarkTheme();
+            if (isDark)
                 DarkThemeRadio.IsChecked = true;
             else
                 LightThemeRadio.IsChecked = true;
@@ -47,6 +45,53 @@ public partial class SettingsDialog : UserControl
         catch
         {
             DarkThemeRadio.IsChecked = true;
+        }
+    }
+
+    private void LoadCurrentIcon()
+    {
+        try
+        {
+            // 检查是否有自定义图标
+            var appPath = AppDomain.CurrentDomain.BaseDirectory;
+            var customIconPath = Path.Combine(appPath, "custom_icon.png");
+            
+            if (File.Exists(customIconPath))
+            {
+                _customIconPath = customIconPath;
+                DisplayIconPreview(customIconPath);
+                IconFilePathText.Text = $"当前图标：custom_icon.png";
+            }
+            else
+            {
+                // 使用默认图标
+                IconFilePathText.Text = "当前图标：默认图标";
+            }
+        }
+        catch
+        {
+            IconFilePathText.Text = "加载图标失败";
+        }
+    }
+
+    private void DisplayIconPreview(string imagePath)
+    {
+        try
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(imagePath, UriKind.Absolute);
+            bitmap.DecodePixelWidth = 64;
+            bitmap.DecodePixelHeight = 64;
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            bitmap.Freeze();
+            
+            CurrentIconPreview.Source = bitmap;
+        }
+        catch
+        {
+            // 如果加载失败，不显示预览
         }
     }
 
@@ -144,17 +189,119 @@ public partial class SettingsDialog : UserControl
 
     #endregion
 
+    private void SelectIconButton_Click(object sender, RoutedEventArgs e)
+    {
+        var openFileDialog = new OpenFileDialog
+        {
+            Title = "选择应用图标",
+            Filter = "图片文件|*.png;*.jpg;*.jpeg;*.bmp|PNG 文件|*.png|JPG 文件|*.jpg;*.jpeg|所有文件|*.*",
+            FilterIndex = 1,
+            CheckFileExists = true,
+            CheckPathExists = true
+        };
+
+        if (openFileDialog.ShowDialog() == true)
+        {
+            try
+            {
+                var selectedPath = openFileDialog.FileName;
+                
+                // 验证图片尺寸
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(selectedPath, UriKind.Absolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                
+                if (bitmap.Width < 64 || bitmap.Height < 64)
+                {
+                    MessageBox.Show(
+                        "图片尺寸过小，建议使用 256x256 或更大的图片。\n\n" +
+                        $"当前尺寸：{bitmap.Width}x{bitmap.Height}",
+                        "警告",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                
+                // 复制图片到应用目录
+                var appPath = AppDomain.CurrentDomain.BaseDirectory;
+                var destPath = Path.Combine(appPath, "custom_icon.png");
+                
+                // 转换为 PNG 格式
+                ConvertToPng(selectedPath, destPath);
+                
+                // 更新预览
+                _customIconPath = destPath;
+                DisplayIconPreview(destPath);
+                IconFilePathText.Text = $"已选择：{Path.GetFileName(selectedPath)}";
+                
+                MessageBox.Show(
+                    "图标已更新！\n\n注意：需要重启应用程序才能看到完整效果。\n桌面快捷方式图标可能需要重新创建。",
+                    "提示",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"选择图标失败：{ex.Message}",
+                    "错误",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+    }
+
+    private void ConvertToPng(string sourcePath, string destPath)
+    {
+        try
+        {
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.UriSource = new Uri(sourcePath, UriKind.Absolute);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+            
+            // 创建编码转换器保存为 PNG
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            
+            using (var stream = new FileStream(destPath, FileMode.Create, FileAccess.Write))
+            {
+                encoder.Save(stream);
+            }
+        }
+        catch
+        {
+            // 如果转换失败，直接复制文件
+            File.Copy(sourcePath, destPath, true);
+        }
+    }
+
     private void ResetDefaults_Click(object sender, RoutedEventArgs e)
     {
         try
         {
-            // 恢复默认：浅色主题 + 蓝色
-            LightThemeRadio.IsChecked = true;
+            // 恢复默认：深色主题 + 蓝色
+            DarkThemeRadio.IsChecked = true;
             _currentColor = "Blue";
             
             HighlightSelectedColor("Blue");
-            ThemeManager.SetLightTheme();
+            ThemeManager.SetDarkTheme();
             ThemeManager.SetPrimaryColor(ThemeManager.GetColorFromName("Blue"));
+            
+            // 删除自定义图标
+            var appPath = AppDomain.CurrentDomain.BaseDirectory;
+            var customIconPath = Path.Combine(appPath, "custom_icon.png");
+            if (File.Exists(customIconPath))
+            {
+                File.Delete(customIconPath);
+                _customIconPath = null;
+                IconFilePathText.Text = "当前图标：默认图标";
+                CurrentIconPreview.Source = null;
+            }
+            
+            MessageBox.Show("已恢复默认设置", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
@@ -164,20 +311,11 @@ public partial class SettingsDialog : UserControl
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {
-        // 主题和颜色已在切换时实时持久化，直接关闭
         DialogHost.CloseDialogCommand.Execute(true, null);
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
-        // 回滚到打开对话框前的状态
-        if (_originalIsDark)
-            ThemeManager.SetDarkTheme();
-        else
-            ThemeManager.SetLightTheme();
-
-        ThemeManager.SetPrimaryColor(ThemeManager.GetColorFromName(_originalColor));
-
         DialogHost.CloseDialogCommand.Execute(false, null);
     }
 }
