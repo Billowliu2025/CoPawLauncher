@@ -257,30 +257,6 @@
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
-
-                <!-- 关于应用 -->
-                <Border Background="{DynamicResource MaterialDesignTextFieldBoxBackground}"
-                        CornerRadius="8"
-                        Padding="16">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <materialDesign:PackIcon Kind="Information" 
-                                                    Width="20" Height="20"
-                                                    Margin="0,0,8,0"
-                                                    Foreground="{DynamicResource PrimaryHueMidBrush}"/>
-                            <TextBlock Text="关于应用" 
-                                       FontSize="16"
-                                       FontWeight="SemiBold"/>
-                        </StackPanel>
-                        <TextBlock Text="CoPaw Launcher v1.0.0"
-                                   FontSize="13"
-                                   Opacity="0.8"/>
-                        <TextBlock Text="基于 .NET 10 + WPF + MaterialDesign"
-                                   FontSize="12"
-                                   Opacity="0.6"
-                                   Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
             </StackPanel>
         </ScrollViewer>
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
@@ -7,7 +8,7 @@ using System.Text.Json.Serialization;
 namespace CoPawLauncher;
 
 /// <summary>
-/// 通过 GitHub Releases API 检查版本更新
+/// 通过 GitHub Releases API 检查版本更新，支持下载和安装
 /// </summary>
 public static class UpdateChecker
 {
@@ -43,12 +44,10 @@ public static class UpdateChecker
     /// <summary>
     /// 检查是否有新版本可用
     /// </summary>
-    /// <returns>检查结果</returns>
     public static async Task<UpdateCheckResult> CheckForUpdateAsync()
     {
         try
         {
-            // 先发送请求，检查响应状态码
             var response = await _httpClient.GetAsync(LatestReleaseUrl);
 
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -69,7 +68,6 @@ public static class UpdateChecker
 
             if (latestVersion > currentVersion)
             {
-                // 查找 MSI 下载链接
                 var msiAsset = release.Assets?.FirstOrDefault(a =>
                     a.Name?.EndsWith(".msi", StringComparison.OrdinalIgnoreCase) == true);
 
@@ -78,7 +76,9 @@ public static class UpdateChecker
                     HasUpdate = true,
                     LatestVersion = latestTag,
                     ReleaseNotes = release.Body ?? "",
-                    DownloadUrl = msiAsset?.BrowserDownloadUrl ?? release.HtmlUrl ?? "",
+                    DownloadUrl = msiAsset?.BrowserDownloadUrl ?? "",
+                    DownloadFileName = msiAsset?.Name ?? "",
+                    DownloadSize = msiAsset?.Size ?? 0,
                     ReleasePageUrl = release.HtmlUrl ?? ""
                 };
             }
@@ -109,15 +109,99 @@ public static class UpdateChecker
     }
 
     /// <summary>
+    /// 下载更新文件到临时目录
+    /// </summary>
+    /// <param name="downloadUrl">下载地址</param>
+    /// <param name="fileName">文件名</param>
+    /// <param name="progress">进度回调（0~100）</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>下载后的本地文件路径</returns>
+    public static async Task<string> DownloadUpdateAsync(
+        string downloadUrl,
+        string fileName,
+        IProgress<int>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        var downloadDir = Path.Combine(SettingsStore.DataFolder, "updates");
+        Directory.CreateDirectory(downloadDir);
+        var localPath = Path.Combine(downloadDir, fileName);
+
+        // 如果已有同名文件先删除
+        if (File.Exists(localPath))
+            File.Delete(localPath);
+
+        using var response = await _httpClient.GetAsync(downloadUrl,
+            HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        var totalBytes = response.Content.Headers.ContentLength ?? -1;
+        await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        await using var fileStream = new FileStream(localPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+
+        var buffer = new byte[81920];
+        long totalRead = 0;
+        int bytesRead;
+        int lastReportedPercent = -1;
+
+        while ((bytesRead = await contentStream.ReadAsync(buffer, cancellationToken)) > 0)
+        {
+            await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken);
+            totalRead += bytesRead;
+
+            if (totalBytes > 0)
+            {
+                var percent = (int)(totalRead * 100 / totalBytes);
+                if (percent != lastReportedPercent)
+                {
+                    lastReportedPercent = percent;
+                    progress?.Report(percent);
+                }
+            }
+        }
+
+        progress?.Report(100);
+        return localPath;
+    }
+
+    /// <summary>
+    /// 启动 MSI 安装程序并退出当前应用
+    /// </summary>
+    /// <param name="msiPath">MSI 文件路径</param>
+    public static void LaunchInstallerAndExit(string msiPath)
+    {
+        try
+        {
+            // 使用 msiexec 启动安装
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "msiexec",
+                Arguments = $"/i \"{msiPath}\"",
+                UseShellExecute = true
+            });
+
+            // 停止 CoPaw 后台进程并退出应用
+            App.StopCopawProcess();
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+            {
+                System.Windows.Application.Current.Shutdown();
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"启动安装程序失败：{ex.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// 创建配置好的 HttpClient
     /// </summary>
     private static HttpClient CreateHttpClient()
     {
         var client = new HttpClient
         {
-            Timeout = TimeSpan.FromSeconds(15)
+            Timeout = TimeSpan.FromMinutes(10) // 下载大文件需要更长超时
         };
-        // GitHub API 要求 User-Agent
         client.DefaultRequestHeaders.UserAgent.ParseAdd($"CoPawLauncher/{CurrentVersion}");
         client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
         return client;
@@ -138,8 +222,14 @@ public class UpdateCheckResult
     /// <summary>更新说明</summary>
     public string ReleaseNotes { get; init; } = "";
 
-    /// <summary>下载地址（优先 MSI，fallback 到 Release 页面）</summary>
+    /// <summary>MSI 下载地址</summary>
     public string DownloadUrl { get; init; } = "";
+
+    /// <summary>下载文件名</summary>
+    public string DownloadFileName { get; init; } = "";
+
+    /// <summary>下载文件大小（字节）</summary>
+    public long DownloadSize { get; init; }
 
     /// <summary>Release 页面地址</summary>
     public string ReleasePageUrl { get; init; } = "";
