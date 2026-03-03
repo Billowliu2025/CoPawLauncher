@@ -18,7 +18,7 @@ public partial class MainWindow : Window
     private bool _isMaximized = false;
 
     /// <summary>
-    /// WebView2 用户数据目录，存放在 %LOCALAPPDATA%\CoPawLauncher 下
+    /// WebView2 用户数据目录，存放在 %LOCALAPPDATA%\CoPawLauncher 中
     /// </summary>
     private static readonly string _webView2UserDataFolder =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CoPawLauncher");
@@ -28,9 +28,30 @@ public partial class MainWindow : Window
         InitializeComponent();
         ApplyCustomIcon();
         InitializeWebView();
+        UpdateTitleBarForeground();
+        
+        // 订阅主题变化事件
+        ThemeManager.ThemeChanged += OnThemeChanged;
         
         // 添加键盘快捷键处理
         KeyDown += MainWindow_KeyDown;
+    }
+
+    /// <summary>
+    /// 主题变化时更新标题栏颜色
+    /// </summary>
+    private void OnThemeChanged(bool isDark)
+    {
+        UpdateTitleBarForeground();
+    }
+
+    /// <summary>
+    /// 更新标题栏前景色（深色主题白色，浅色主题黑色）
+    /// </summary>
+    private void UpdateTitleBarForeground()
+    {
+        var foreground = ThemeManager.GetTitleBarForegroundBrush();
+        TitleText.Foreground = foreground;
     }
 
     /// <summary>
@@ -147,7 +168,7 @@ public partial class MainWindow : Window
         }
     }
 
-    // Win32 API 用于窗口边缘拖拽调整大小
+    // Win32 API 用于窗口边缘拖动调整大小
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     private static extern bool ReleaseCapture();
 
@@ -157,7 +178,7 @@ public partial class MainWindow : Window
     private const uint WM_SYSCOMMAND = 0x0112;
 
     /// <summary>
-    /// 边缘拖拽调整窗口大小
+    /// 边缘拖动调整窗口大小
     /// </summary>
     private void Resize_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
@@ -293,6 +314,7 @@ public partial class MainWindow : Window
         if (result is bool saved && saved)
         {
             ApplyCustomIcon();
+            UpdateTitleBarForeground();
             StatusText.Text = "设置已保存";
         }
     }

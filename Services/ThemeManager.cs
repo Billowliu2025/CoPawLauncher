@@ -12,6 +12,11 @@ public static class ThemeManager
     private static readonly PaletteHelper _paletteHelper = new PaletteHelper();
 
     /// <summary>
+    /// 主题变化事件
+    /// </summary>
+    public static event Action<bool>? ThemeChanged;
+
+    /// <summary>
     /// 应用深色主题
     /// </summary>
     /// <param name="save">是否持久化到数据库</param>
@@ -19,6 +24,7 @@ public static class ThemeManager
     {
         ApplyBaseTheme(true);
         if (save) SettingsStore.SetBool(SettingsStore.KeyIsDarkTheme, true);
+        ThemeChanged?.Invoke(true);
     }
 
     /// <summary>
@@ -29,6 +35,7 @@ public static class ThemeManager
     {
         ApplyBaseTheme(false);
         if (save) SettingsStore.SetBool(SettingsStore.KeyIsDarkTheme, false);
+        ThemeChanged?.Invoke(false);
     }
 
     /// <summary>
@@ -106,6 +113,15 @@ public static class ThemeManager
         {
             return true; // 默认深色
         }
+    }
+
+    /// <summary>
+    /// 获取标题栏前景色
+    /// </summary>
+    /// <returns>深色主题返回白色，浅色主题返回黑色</returns>
+    public static Brush GetTitleBarForegroundBrush()
+    {
+        return IsDarkTheme() ? Brushes.White : Brushes.Black;
     }
 
     /// <summary>
