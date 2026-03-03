@@ -164,7 +164,10 @@ public partial class MainWindow : Window
                 this.Left = point.X - (this.ActualWidth / 2);
                 this.Top = point.Y - 15;
             }
-            this.DragMove();
+            // 使用 Win32 消息触发拖动，比 DragMove() 更可靠（DialogHost/WebView2 场景）
+            var hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            ReleaseCapture();
+            SendMessage(hwnd, WM_NCLBUTTONDOWN, new IntPtr(HTCAPTION), IntPtr.Zero);
         }
     }
 
@@ -176,6 +179,8 @@ public partial class MainWindow : Window
     private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
     private const uint WM_SYSCOMMAND = 0x0112;
+    private const uint WM_NCLBUTTONDOWN = 0x00A1;
+    private const int HTCAPTION = 2;
 
     /// <summary>
     /// 边缘拖动调整窗口大小
