@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Media;
 using MaterialDesignThemes.Wpf;
 
-namespace CoPawLauncher;
+namespace CoPawLauncher.Services;
 
 /// <summary>
 /// 全局主题管理器

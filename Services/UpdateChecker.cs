@@ -3,9 +3,8 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reflection;
-using System.Text.Json.Serialization;
 
-namespace CoPawLauncher;
+namespace CoPawLauncher.Services;
 
 /// <summary>
 /// 通过 GitHub Releases API 检查版本更新，支持下载和安装
@@ -153,14 +152,17 @@ public static class UpdateChecker
 
             if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
-                // API 限额用尽，但如果已知有新版本，可引导用户到 Release 页面
+                // API 限额用尽，根据命名规则直接构造下载 URL
                 if (knownLatestVersion != null)
                 {
+                    var expectedFileName = $"CoPawLauncher-{knownLatestVersion}-win-x64.msi";
                     return new UpdateCheckResult
                     {
                         HasUpdate = true,
                         LatestVersion = knownLatestVersion,
-                        ReleasePageUrl = $"https://github.com/{Owner}/{Repo}/releases/latest"
+                        DownloadUrl = $"https://github.com/{Owner}/{Repo}/releases/download/v{knownLatestVersion}/{expectedFileName}",
+                        DownloadFileName = expectedFileName,
+                        ReleasePageUrl = $"https://github.com/{Owner}/{Repo}/releases/tag/v{knownLatestVersion}"
                     };
                 }
                 return UpdateCheckResult.Failed("GitHub API 请求频率超限，请稍后重试（约 1 分钟）");
@@ -312,80 +314,4 @@ public static class UpdateChecker
         client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
         return client;
     }
-}
-
-/// <summary>
-/// 版本更新检查结果
-/// </summary>
-public class UpdateCheckResult
-{
-    /// <summary>是否有新版本</summary>
-    public bool HasUpdate { get; init; }
-
-    /// <summary>最新版本号</summary>
-    public string LatestVersion { get; init; } = "";
-
-    /// <summary>更新说明</summary>
-    public string ReleaseNotes { get; init; } = "";
-
-    /// <summary>MSI 下载地址</summary>
-    public string DownloadUrl { get; init; } = "";
-
-    /// <summary>下载文件名</summary>
-    public string DownloadFileName { get; init; } = "";
-
-    /// <summary>下载文件大小（字节）</summary>
-    public long DownloadSize { get; init; }
-
-    /// <summary>Release 页面地址</summary>
-    public string ReleasePageUrl { get; init; } = "";
-
-    /// <summary>错误信息（检查失败时）</summary>
-    public string? ErrorMessage { get; init; }
-
-    /// <summary>检查是否成功</summary>
-    public bool IsSuccess => ErrorMessage == null;
-
-    /// <summary>创建失败结果</summary>
-    public static UpdateCheckResult Failed(string message) => new()
-    {
-        HasUpdate = false,
-        ErrorMessage = message
-    };
-}
-
-/// <summary>
-/// GitHub Release API 响应模型
-/// </summary>
-public class GitHubRelease
-{
-    [JsonPropertyName("tag_name")]
-    public string? TagName { get; set; }
-
-    [JsonPropertyName("name")]
-    public string? Name { get; set; }
-
-    [JsonPropertyName("body")]
-    public string? Body { get; set; }
-
-    [JsonPropertyName("html_url")]
-    public string? HtmlUrl { get; set; }
-
-    [JsonPropertyName("assets")]
-    public List<GitHubAsset>? Assets { get; set; }
-}
-
-/// <summary>
-/// GitHub Release Asset 模型
-/// </summary>
-public class GitHubAsset
-{
-    [JsonPropertyName("name")]
-    public string? Name { get; set; }
-
-    [JsonPropertyName("browser_download_url")]
-    public string? BrowserDownloadUrl { get; set; }
-
-    [JsonPropertyName("size")]
-    public long Size { get; set; }
 }

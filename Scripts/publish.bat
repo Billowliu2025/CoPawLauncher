@@ -6,7 +6,8 @@ echo.
 echo 正在发布 Release 版本...
 echo.
 
-cd /d "%~dp0"
+:: 切换到项目根目录（脚本位于 Scripts\ 子目录）
+cd /d "%~dp0.."
 
 dotnet publish -c Release -r win-x64 --self-contained true -o "publish"
 

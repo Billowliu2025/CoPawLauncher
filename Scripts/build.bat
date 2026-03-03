@@ -4,7 +4,8 @@ echo   CoPaw Launcher 构建工具
 echo ========================================
 echo.
 
-cd /d "%~dp0"
+:: 切换到项目根目录（脚本位于 Scripts\ 子目录）
+cd /d "%~dp0.."
 
 echo 正在还原 NuGet 包...
 dotnet restore
@@ -23,9 +24,9 @@ if %ERRORLEVEL% EQU 0 (
     echo %CD%\bin\Debug\net10.0-windows\CoPawLauncher.exe
     echo.
     echo 下一步:
-    echo   1. 运行 run.bat 启动程序
-    echo   2. 运行 create-shortcut.bat 创建桌面快捷方式
-    echo   3. 运行 publish.bat 发布独立版本
+    echo   1. 运行 Scripts\run.bat 启动程序
+    echo   2. 运行 Scripts\create-shortcut.bat 创建桌面快捷方式
+    echo   3. 运行 Scripts\publish.bat 发布独立版本
     echo.
 ) else (
     echo.

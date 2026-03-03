@@ -4,16 +4,18 @@ echo   Create Desktop Shortcut
 echo ========================================
 echo.
 
-set SCRIPT_DIR=%~dp0
-set EXE_PATH=%SCRIPT_DIR%bin\Debug\net10.0-windows\CoPawLauncher.exe
-set ICON_PATH=%SCRIPT_DIR%app.ico
+:: 项目根目录（脚本位于 Scripts\ 子目录）
+set ROOT_DIR=%~dp0..\
+
+set EXE_PATH=%ROOT_DIR%bin\Debug\net10.0-windows\CoPawLauncher.exe
+set ICON_PATH=%ROOT_DIR%Assets\app.ico
 set DESKTOP=%USERPROFILE%\Desktop
 
 if not exist "%EXE_PATH%" (
     echo [ERROR] Executable not found
     echo Path: %EXE_PATH%
     echo.
-    echo Please run build.bat first
+    echo Please run Scripts\build.bat first
     pause
     exit /b 1
 )
@@ -27,7 +29,7 @@ set PS_SCRIPT=%TEMP%\create_shortcut.ps1
 echo $WshShell = New-Object -ComObject WScript.Shell
 echo $Shortcut = $WshShell.CreateShortcut('%DESKTOP%\CoPaw Launcher.lnk'^)
 echo $Shortcut.TargetPath = '%EXE_PATH%'
-echo $Shortcut.WorkingDirectory = '%SCRIPT_DIR%'
+echo $Shortcut.WorkingDirectory = '%ROOT_DIR%'
 echo $Shortcut.Description = 'CoPaw Launcher'
 echo $Shortcut.IconLocation = '%ICON_PATH%'
 echo $Shortcut.Save^(^)
@@ -48,7 +50,5 @@ if %ERRORLEVEL% EQU 0 (
 )
 
 :: Cleanup
-del "%PS_SCRIPT%" >nul 2>&1
-
-echo.
+del "%PS_SCRIPT%" 2>nul
 pause

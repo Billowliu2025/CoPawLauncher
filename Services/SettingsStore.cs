@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Data.Sqlite;
 
-namespace CoPawLauncher;
+namespace CoPawLauncher.Services;
 
 /// <summary>
 /// 基于 SQLite 的设置持久化存储

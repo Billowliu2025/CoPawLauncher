@@ -2,12 +2,13 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Web.WebView2.Core;
 using MaterialDesignThemes.Wpf;
 
-namespace CoPawLauncher;
+namespace CoPawLauncher.Views;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -117,6 +118,75 @@ public partial class MainWindow : Window
             e.Handled = true;
         }
     }
+
+    #region 窗口拖动与调整大小
+
+    /// <summary>
+    /// 标题栏拖动移动窗口，双击最大化/还原
+    /// </summary>
+    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            MaximizeButton_Click(sender, e);
+        }
+        else
+        {
+            // 如果当前是最大化状态，拖动时先还原
+            if (_isMaximized)
+            {
+                var point = e.GetPosition(this);
+                _isMaximized = false;
+                this.WindowState = WindowState.Normal;
+                MaximizeIcon.Kind = PackIconKind.WindowMaximize;
+                // 让窗口跟随鼠标位置
+                this.Left = point.X - (this.ActualWidth / 2);
+                this.Top = point.Y - 15;
+            }
+            this.DragMove();
+        }
+    }
+
+    // Win32 API 用于窗口边缘拖拽调整大小
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool ReleaseCapture();
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    private const uint WM_SYSCOMMAND = 0x0112;
+
+    /// <summary>
+    /// 边缘拖拽调整窗口大小
+    /// </summary>
+    private void Resize_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not System.Windows.Shapes.Rectangle rect) return;
+        if (_isMaximized) return; // 最大化时不允许调整
+
+        var hwnd = new WindowInteropHelper(this).Handle;
+        // SC_SIZE 方向码：1=左 2=右 3=上 4=左上 5=右上 6=下 7=左下 8=右下
+        int direction = rect.Name switch
+        {
+            "ResizeTop" => 3,
+            "ResizeBottom" => 6,
+            "ResizeLeft" => 1,
+            "ResizeRight" => 2,
+            "ResizeTopLeft" => 4,
+            "ResizeTopRight" => 5,
+            "ResizeBottomLeft" => 7,
+            "ResizeBottomRight" => 8,
+            _ => 0
+        };
+
+        if (direction > 0)
+        {
+            ReleaseCapture();
+            SendMessage(hwnd, WM_SYSCOMMAND, (IntPtr)(0xF000 + direction), IntPtr.Zero);
+        }
+    }
+
+    #endregion
 
     #region 窗口控制按钮
 

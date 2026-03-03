@@ -37,6 +37,11 @@ packages/
 # Rider
 .idea/
 
+# Python
+.venv/
+__pycache__/
+*.pyc
+
 # Publish
 publish/
 

@@ -8,7 +8,7 @@ using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using MaterialDesignThemes.Wpf;
 
-namespace CoPawLauncher;
+namespace CoPawLauncher.Views;
 
 /// <summary>
 /// SettingsDialog.xaml 的交互逻辑

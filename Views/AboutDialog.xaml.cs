@@ -5,7 +5,7 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using MaterialDesignThemes.Wpf;
 
-namespace CoPawLauncher;
+namespace CoPawLauncher.Views;
 
 /// <summary>
 /// AboutDialog.xaml 的交互逻辑
